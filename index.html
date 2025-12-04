@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game Ular Tangga</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background: #020617;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    h1 {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 24px;
+      color: #f97316;
+    }
+
+    .subtitle {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      background: #111827;
+      padding: 6px;
+      border-radius: 12px;
+    }
+
+    .cell {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* square */
+      background: #1f2937;
+      border-radius: 6px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .cell-inner {
+      position: absolute;
+      inset: 4px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #111827, #020617);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 2px 4px;
+      font-size: 10px;
+      box-sizing: border-box;
+    }
+
+    .cell:nth-child(2n) .cell-inner {
+      background: linear-gradient(135deg, #020617, #111827);
+    }
+
+    .cell-number {
+      color: #9ca3af;
+    }
+
+    .cell-mark {
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    .cell-mark.ladder {
+      color: #22c55e;
+    }
+
+    .cell-mark.snake {
+      color: #ef4444;
+    }
+
+    .players {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+    }
+
+    .player-token {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(15,23,42,0.9);
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+    }
+
+    .player1 {
+      background: #3b82f6;
+    }
+
+    .player2 {
+      background: #facc15;
+    }
+
+    .panel {
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 16px;
+      color: #e5e7eb;
+    }
+
+    .dice-display {
+      font-size: 32px;
+      text-align: center;
+      padding: 10px;
+      background: #111827;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.05s ease, box-shadow 0.1s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+      box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .status {
+      font-size: 13px;
+      line-height: 1.4;
+      background: #020617;
+      border-radius: 8px;
+      padding: 8px;
+      border: 1px solid #1f2937;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .status-line {
+      margin-bottom: 4px;
+    }
+
+    .current-player {
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    .players-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .player-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot-label {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .dot-p1 {
+      background: #3b82f6;
+    }
+
+    .dot-p2 {
+      background: #facc15;
+    }
+
+    .winner {
+      color: #facc15;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎲 Game Ular Tangga</h1>
+    <div class="subtitle">2 Pemain · Lempar dadu bergantian · Harus tepat di kotak 100 untuk menang</div>
+
+    <div id="board" class="board"></div>
+
+    <div class="panel">
+      <h2>Status Permainan</h2>
+
+      <div class="players-info">
+        <div class="player-label">
+          <span class="dot-label dot-p1"></span> Player 1 (Biru)
+        </div>
+        <div class="player-label">
+          <span class="dot-label dot-p2"></span> Player 2 (Kuning)
+        </div>
+        <div>Giliran: <span id="currentPlayer" class="current-player">Player 1</span></div>
+      </div>
+
+      <div class="dice-display" id="diceDisplay">🎲</div>
+
+      <button id="rollButton">
+        🎲 Lempar Dadu
+      </button>
+
+      <button id="resetButton" style="background:#6b7280; margin-top:4px;">
+        🔄 Reset Game
+      </button>
+
+      <div class="status" id="logBox"></div>
+    </div>
+  </div>
+
+  <script>
+    // Peta ular & tangga (key = posisi awal, value = posisi akhir)
+    const ladders = {
+      2: 38,
+      7: 14,
+      8: 31,
+      15: 26,
+      21: 42,
+      28: 84,
+      36: 44,
+      51: 67,
+      71: 91,
+      78: 98,
+      87: 94
+    };
+
+    const snakes = {
+      16: 6,
+      48: 30,
+      62: 19,
+      64: 60,
+      74: 53,
+      89: 68,
+      92: 88,
+      95: 75,
+      99: 80
+    };
+
+    const boardElement = document.getElementById('board');
+    const diceDisplay = document.getElementById('diceDisplay');
+    const rollButton = document.getElementById('rollButton');
+    const resetButton = document.getElementById('resetButton');
+    const logBox = document.getElementById('logBox');
+    const currentPlayerSpan = document.getElementById('currentPlayer');
+
+    let positions = [1, 1]; // index 0 = player1, 1 = player2
+    let currentPlayer = 0;   // 0 atau 1
+    let gameOver = false;
+
+    function createBoard() {
+      boardElement.innerHTML = '';
+      // Kita gambar dari baris atas (10) ke bawah (1)
+      for (let row = 10; row >= 1; row--) {
+        const rowFromBottom = row; // 1 = baris bawah, 10 = baris atas
+        for (let col = 1; col <= 10; col++) {
+          let num;
+          if (rowFromBottom % 2 === 0) {
+            // baris genap dari bawah: arah kanan ke kiri
+            num = rowFromBottom * 10 - (col - 1);
+          } else {
+            // baris ganjil dari bawah: arah kiri ke kanan
+            num = (rowFromBottom - 1) * 10 + col;
+          }
+
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.cell = num;
+
+          const inner = document.createElement('div');
+          inner.className = 'cell-inner';
+
+          const numberSpan = document.createElement('span');
+          numberSpan.className = 'cell-number';
+          numberSpan.textContent = num;
+
+          const markSpan = document.createElement('span');
+          markSpan.className = 'cell-mark';
+
+          if (ladders[num]) {
+            markSpan.textContent = '⤴';
+            markSpan.classList.add('ladder');
+          } else if (snakes[num]) {
+            markSpan.textContent = '⤵';
+            markSpan.classList.add('snake');
+          } else {
+            markSpan.textContent = '';
+          }
+
+          inner.appendChild(numberSpan);
+          inner.appendChild(markSpan);
+
+          const playersDiv = document.createElement('div');
+          playersDiv.className = 'players';
+          playersDiv.dataset.players = num;
+
+          cell.appendChild(inner);
+          cell.appendChild(playersDiv);
+          boardElement.appendChild(cell);
+        }
+      }
+    }
+
+    function renderPlayers() {
+      // Bersihkan token
+      const playersDivs = document.querySelectorAll('.players');
+      playersDivs.forEach(div => div.innerHTML = '');
+
+      // Render token tiap pemain
+      positions.forEach((pos, index) => {
+        const targetPlayersDiv = document.querySelector('.players[data-players="' + pos + '"]');
+        if (!targetPlayersDiv) return;
+        const token = document.createElement('div');
+        token.className = 'player-token ' + (index === 0 ? 'player1' : 'player2');
+        targetPlayersDiv.appendChild(token);
+      });
+    }
+
+    function log(message, isWinner = false) {
+      const line = document.createElement('div');
+      line.className = 'status-line';
+      if (isWinner) line.classList.add('winner');
+      line.textContent = message;
+      logBox.prepend(line);
+    }
+
+    function rollDice() {
+      if (gameOver) return;
+      const dice = Math.floor(Math.random() * 6) + 1;
+
+      diceDisplay.textContent = dice;
+      const playerName = currentPlayer === 0 ? 'Player 1' : 'Player 2';
+      let newPos = positions[currentPlayer] + dice;
+
+      // Aturan: harus tepat di 100
+      if (newPos > 100) {
+        log(playerName + ' melempar ' + dice + ' tapi lewat 100, tetap di ' + positions[currentPlayer] + '.');
+        switchTurn();
+        return;
+      }
+
+      log(playerName + ' melempar ' + dice + ' dan maju ke ' + newPos + '.');
+
+      // Cek ular / tangga
+      if (ladders[newPos]) {
+        const to = ladders[newPos];
+        log('Tangga! ' + playerName + ' naik dari ' + newPos + ' ke ' + to + '.');
+        newPos = to;
+      } else if (snakes[newPos]) {
+        const to = snakes[newPos];
+        log('Ular! ' + playerName + ' turun dari ' + newPos + ' ke ' + to + '.');
+        newPos = to;
+      }
+
+      positions[currentPlayer] = newPos;
+      renderPlayers();
+
+      // Cek menang
+      if (newPos === 100) {
+        gameOver = true;
+        log(playerName + ' MENANG! 🎉', true);
+        currentPlayerSpan.textContent = playerName + ' MENANG!';
+        return;
+      }
+
+      switchTurn();
+    }
+
+    function switchTurn() {
+      currentPlayer = currentPlayer === 0 ? 1 : 0;
+      currentPlayerSpan.textContent = currentPlayer === 0 ? 'Player 1' : 'Player 2';
+    }
+
+    function resetGame() {
+      positions = [1, 1];
+      currentPlayer = 0;
+      gameOver = false;
+      diceDisplay.textContent = '🎲';
+      logBox.innerHTML = '';
+      currentPlayerSpan.textContent = 'Player 1';
+      renderPlayers();
+      log('Game di-reset. Player 1 mulai duluan.');
+    }
+
+    rollButton.addEventListener('click', rollDice);
+    resetButton.addEventListener('click', resetGame);
+
+    // Init awal
+    createBoard();
+    renderPlayers();
+    log('Selamat datang di Ular Tangga! Player 1 mulai duluan.');
+  </script>
+</body>
+</html>
