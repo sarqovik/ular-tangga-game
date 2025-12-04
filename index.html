@@ -2,12 +2,19 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Game Ular Tangga vs Bot</title>
+  <title>Polana Ular Tangga vs Bot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
+    :root {
+      --polana-orange: #f97316;
+      --polana-dark: #020617;
+      --polana-bg: radial-gradient(circle at top, #1f2937 0, #020617 45%, #000000 100%);
+    }
+
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f172a;
+      font-family: system-ui, sans-serif;
+      background: var(--polana-bg);
       color: #e5e7eb;
       display: flex;
       justify-content: center;
@@ -18,127 +25,109 @@
     }
 
     .container {
-      background: #020617;
-      border-radius: 16px;
+      background: rgba(2, 6, 23, 0.96);
+      border-radius: 20px;
       padding: 20px;
-      max-width: 900px;
+      max-width: 960px;
       width: 100%;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.85),
+        0 0 40px rgba(249,115,22,0.18);
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 20px;
+      border: 1px solid rgba(249,115,22,0.3);
+    }
+
+    /* Header */
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
     }
 
     h1 {
-      grid-column: 1 / -1;
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 10px;
+      margin: 0;
       font-size: 24px;
-      color: #f97316;
+      color: var(--polana-orange);
+      text-shadow: 0 0 10px rgba(249,115,22,0.7);
     }
 
-    .subtitle {
-      grid-column: 1 / -1;
-      text-align: center;
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 10px;
-    }
-
+    /* BOARD BACKGROUND CUSTOM IMAGE */
     .board {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(10, 1fr);
-      gap: 2px;
-      background: #111827;
-      padding: 6px;
-      border-radius: 12px;
+      gap: 0;
+      background-image: url("Polana.jpg");
+      background-size: cover;
+      background-position: center;
+      padding: 0;
+      border: none;
+      width: 100%;
     }
 
     .cell {
       position: relative;
       width: 100%;
-      padding-top: 100%; /* square */
-      background: #1f2937;
-      border-radius: 6px;
+      padding-top: 100%;
+      background: transparent;
+      border-radius: 0;
       overflow: hidden;
-      box-sizing: border-box;
     }
 
     .cell-inner {
       position: absolute;
-      inset: 4px;
-      border-radius: 4px;
-      background: linear-gradient(135deg, #111827, #020617);
+      inset: 0;
+      background: transparent;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 2px 4px;
-      font-size: 10px;
-      box-sizing: border-box;
+      justify-content: center;
+      align-items: center;
     }
 
-    .cell:nth-child(2n) .cell-inner {
-      background: linear-gradient(135deg, #020617, #111827);
+    /* Hide number & icon snake/ladder */
+    .cell-number, .cell-mark {
+      display: none !important;
     }
 
-    .cell-number {
-      color: #9ca3af;
-    }
-
-    .cell-mark {
-      font-size: 9px;
-      font-weight: bold;
-    }
-
-    .cell-mark.ladder {
-      color: #22c55e;
-    }
-
-    .cell-mark.snake {
-      color: #ef4444;
-    }
-
+    /* Player tokens */
     .players {
       position: absolute;
       inset: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 4px;
       pointer-events: none;
     }
 
     .player-token {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 999px;
-      border: 2px solid rgba(15,23,42,0.9);
-      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      border: 2px solid rgba(15,23,42,1);
     }
 
     .player1 {
-      background: #3b82f6;
+      background: radial-gradient(circle, #fed7aa 0%, #f97316 60%, #ea580c 100%);
+      box-shadow: 0 0 12px rgba(249,115,22,0.7);
     }
 
     .player2 {
-      background: #facc15;
+      background: radial-gradient(circle, #dbeafe 0%, #38bdf8 60%, #0284c7 100%);
+      box-shadow: 0 0 12px rgba(56,189,248,0.7);
     }
 
+    /* Panel kanan */
     .panel {
-      background: #020617;
-      border-radius: 12px;
-      border: 1px solid #1f2937;
+      background: rgba(15,23,42,0.9);
       padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(249,115,22,0.3);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-    }
-
-    .panel h2 {
-      margin: 0;
-      font-size: 16px;
-      color: #e5e7eb;
+      gap: 12px;
     }
 
     .dice-display {
@@ -147,127 +136,45 @@
       padding: 10px;
       background: #111827;
       border-radius: 12px;
-      border: 1px solid #1f2937;
+      border: 1px solid #374151;
+      margin-bottom: 4px;
     }
 
     button {
-      padding: 10px 14px;
+      padding: 10px;
       border-radius: 999px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
       border: none;
-      background: #2563eb;
       color: white;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: transform 0.05s ease, box-shadow 0.1s ease, background 0.15s ease;
-    }
-
-    button:hover {
-      background: #1d4ed8;
-      box-shadow: 0 8px 20px rgba(37,99,235,0.4);
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow: none;
+      box-shadow: 0 8px 24px rgba(249,115,22,0.4);
     }
 
     .status {
       font-size: 13px;
-      line-height: 1.4;
-      background: #020617;
-      border-radius: 8px;
-      padding: 8px;
-      border: 1px solid #1f2937;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
-    }
-
-    .status-line {
-      margin-bottom: 4px;
+      background: #0f172a;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
     }
 
     .current-player {
+      color: #fb923c;
       font-weight: bold;
-      color: #22c55e;
+      text-shadow: 0 0 10px rgba(249,115,22,0.7);
     }
 
-    .players-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 13px;
-    }
-
-    .player-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .dot-label {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-    }
-
-    .dot-p1 {
-      background: #3b82f6;
-    }
-
-    .dot-p2 {
-      background: #facc15;
-    }
-
-    .winner {
-      color: #facc15;
-      font-weight: bold;
-    }
-
-    .name-inputs {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 12px;
-      padding: 8px;
-      border-radius: 10px;
-      border: 1px solid #1f2937;
-      background: #020617;
-    }
-
-    .name-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .name-row label {
-      min-width: 76px;
-    }
-
-    .name-row input {
-      flex: 1;
-      border-radius: 999px;
-      border: 1px solid #374151;
-      background: #020617;
-      color: #e5e7eb;
-      padding: 6px 10px;
-      font-size: 12px;
-      outline: none;
-    }
-
-    .name-row input:focus {
-      border-color: #2563eb;
-    }
-
-    .small-text {
+    /* Footer board */
+    .credit {
+      text-align: center;
       font-size: 11px;
-      color: #9ca3af;
+      color: #f97316;
+      opacity: 0.85;
+      margin-top: 6px;
+      grid-column: 1 / -1;
     }
 
     @media (max-width: 768px) {
@@ -277,373 +184,236 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <h1>🎲 Ular Tangga vs Bot 🤖</h1>
-    <div class="subtitle">Kamu vs Bot · Lempar dadu bergantian · Harus tepat di kotak 100 untuk menang · Sekarang pakai sound effect 🔊</div>
 
+    <div class="header">
+      <h1>Polana Ular Tangga vs Bot</h1>
+    </div>
+
+    <!-- BOARD -->
     <div id="board" class="board"></div>
 
-    <div class="panel">
-      <h2>Pengaturan & Status</h2>
+    <!-- CREDIT TEXT -->
+    <div class="credit">Desain papan by sarqovik</div>
 
-      <div class="name-inputs">
-        <div class="name-row">
-          <label for="nameP1">Kamu</label>
-          <input id="nameP1" type="text" placeholder="Nama kamu" />
-        </div>
-        <div class="name-row">
-          <label for="nameP2">Bot</label>
-          <input id="nameP2" type="text" placeholder="Nama Bot (opsional)" />
-        </div>
-        <button id="setNameButton" style="margin-top:4px; padding:6px 10px; font-size:12px;">
-          ✅ Set Nama
-        </button>
-        <div class="small-text">Kalau dikosongkan: default = "Kamu" & "Bot".</div>
-      </div>
+    <!-- PANEL -->
+    <div class="panel">
+      <h2>Status</h2>
 
       <div class="players-info">
-        <div class="player-label">
-          <span class="dot-label dot-p1"></span>
-          <span id="labelP1">Kamu (Biru)</span>
-        </div>
-        <div class="player-label">
-          <span class="dot-label dot-p2"></span>
-          <span id="labelP2">Bot (Kuning)</span>
-        </div>
         <div>Giliran: <span id="currentPlayer" class="current-player">Kamu</span></div>
       </div>
 
       <div class="dice-display" id="diceDisplay">🎲</div>
 
-      <button id="rollButton">
-        🎲 Lempar Dadu (Giliran Kamu)
-      </button>
-
-      <button id="resetButton" style="background:#6b7280; margin-top:4px;">
-        🔄 Reset Game
-      </button>
+      <button id="rollButton">🎲 Lempar Dadu</button>
+      <button id="resetButton" style="background:#6b7280;">🔄 Reset Game</button>
 
       <div class="status" id="logBox"></div>
     </div>
   </div>
 
   <script>
-    // ====== SOUND ENGINE (Web Audio API) ======
+    /* ================= SOUND ENGINE ================= */
+
     let audioCtx = null;
-
     function ensureAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function beep(freq, dur, type="sine", vol=0.2) {
+      ensureAudioContext();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + dur);
+    }
+    function diceSound() {
+      ensureAudioContext();
+      for (let i=0;i<5;i++){
+        const t=audioCtx.currentTime + i*0.05;
+        const o=audioCtx.createOscillator();
+        const g=audioCtx.createGain();
+        o.type="triangle";
+        o.frequency.value=200+Math.random()*400;
+        g.gain.setValueAtTime(0.18,t);
+        g.gain.exponentialRampToValueAtTime(0.01,t+0.05);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t+0.06);
       }
     }
-
-    function playBeep(frequency, duration, type = 'sine', volume = 0.2) {
-      ensureAudioContext();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.value = frequency;
-      gain.gain.value = volume;
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-      osc.start(now);
-      osc.stop(now + duration);
+    function ladderSound(){ [400,550,700].forEach((f,i)=>setTimeout(()=>beep(f,.12),i*110)); }
+    function snakeSound(){ beep(300,.18,"sawtooth"); setTimeout(()=>beep(180,.22,"sawtooth"),160); }
+    function winSound(){
+      const n=[[523,.18],[587,.18],[659,.18],[784,.3]];
+      n.forEach((x,i)=>setTimeout(()=>beep(x[0],x[1],"square",.25),i*200));
     }
 
-    function playDiceSound() {
-      // beberapa beep cepat naik-turun
-      ensureAudioContext();
-      const now = audioCtx.currentTime;
+    /* ================= GAME LOGIC ================= */
 
-      for (let i = 0; i < 5; i++) {
-        const t = now + i * 0.05;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = 200 + Math.random() * 400;
-        gain.gain.setValueAtTime(0.18, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(t);
-        osc.stop(t + 0.06);
-      }
-    }
+    const ladders = {2:38,7:14,8:31,15:26,21:42,28:84,36:44,51:67,71:91,78:98,87:94};
+    const snakes  = {16:6,48:30,62:19,64:60,74:53,89:68,92:88,95:75,99:80};
 
-    function playLadderSound() {
-      // arpeggio naik
-      const notes = [400, 550, 700];
-      notes.forEach((f, i) => {
-        setTimeout(() => playBeep(f, 0.12, 'sine', 0.22), i * 110);
-      });
-    }
+    const boardEl = document.getElementById("board");
+    const diceDisplay = document.getElementById("diceDisplay");
+    const rollButton = document.getElementById("rollButton");
+    const resetButton = document.getElementById("resetButton");
+    const logBox = document.getElementById("logBox");
+    const currentPlayerSpan = document.getElementById("currentPlayer");
 
-    function playSnakeSound() {
-      // dua nada turun
-      playBeep(300, 0.18, 'sawtooth', 0.22);
-      setTimeout(() => playBeep(180, 0.22, 'sawtooth', 0.22), 160);
-    }
+    let positions=[1,1];
+    let currentPlayer=0; // 0=player,1=bot
+    let gameOver=false;
+    let isProcessing=false;
 
-    function playWinSound() {
-      // melodi pendek
-      const notes = [
-        { f: 523, d: 0.18 },
-        { f: 587, d: 0.18 },
-        { f: 659, d: 0.18 },
-        { f: 784, d: 0.3 }
-      ];
-      notes.forEach((n, i) => {
-        setTimeout(() => playBeep(n.f, n.d, 'square', 0.25), i * 200);
-      });
-    }
-
-    // ====== GAME LOGIC ======
-
-    // Peta ular & tangga (key = posisi awal, value = posisi akhir)
-    const ladders = {
-      2: 38,
-      7: 14,
-      8: 31,
-      15: 26,
-      21: 42,
-      28: 84,
-      36: 44,
-      51: 67,
-      71: 91,
-      78: 98,
-      87: 94
-    };
-
-    const snakes = {
-      16: 6,
-      48: 30,
-      62: 19,
-      64: 60,
-      74: 53,
-      89: 68,
-      92: 88,
-      95: 75,
-      99: 80
-    };
-
-    const boardElement = document.getElementById('board');
-    const diceDisplay = document.getElementById('diceDisplay');
-    const rollButton = document.getElementById('rollButton');
-    const resetButton = document.getElementById('resetButton');
-    const logBox = document.getElementById('logBox');
-    const currentPlayerSpan = document.getElementById('currentPlayer');
-
-    const nameP1Input = document.getElementById('nameP1');
-    const nameP2Input = document.getElementById('nameP2');
-    const setNameButton = document.getElementById('setNameButton');
-    const labelP1 = document.getElementById('labelP1');
-    const labelP2 = document.getElementById('labelP2');
-
-    // index 0 = Kamu (player), index 1 = Bot
-    let positions = [1, 1];
-    let currentPlayer = 0;        // 0 = kamu, 1 = bot
-    let gameOver = false;
-    let isProcessingTurn = false;
-    const isVsBot = true;
-    let playerNames = ['Kamu', 'Bot'];
-
-    function createBoard() {
-      boardElement.innerHTML = '';
-      // gambar dari baris atas (10) ke bawah (1)
-      for (let row = 10; row >= 1; row--) {
-        const rowFromBottom = row;
-        for (let col = 1; col <= 10; col++) {
+    /* Draw board 10x10 (invisible cells but clickable area) */
+    function createBoard(){
+      boardEl.innerHTML="";
+      for(let row=10; row>=1; row--){
+        for(let col=1; col<=10; col++){
           let num;
-          if (rowFromBottom % 2 === 0) {
-            num = rowFromBottom * 10 - (col - 1);
+          if(row%2===0){
+            num=row*10 - (col-1);
           } else {
-            num = (rowFromBottom - 1) * 10 + col;
+            num=(row-1)*10 + col;
           }
+          const c=document.createElement("div");
+          c.className="cell";
+          c.dataset.cell=num;
 
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          cell.dataset.cell = num;
+          const inner=document.createElement("div");
+          inner.className="cell-inner";
 
-          const inner = document.createElement('div');
-          inner.className = 'cell-inner';
+          const numSpan=document.createElement("span");
+          numSpan.className="cell-number";
+          numSpan.textContent=num;
 
-          const numberSpan = document.createElement('span');
-          numberSpan.className = 'cell-number';
-          numberSpan.textContent = num;
+          const mark=document.createElement("span");
+          mark.className="cell-mark";
+          if(ladders[num]) mark.textContent="⤴";
+          if(snakes[num]) mark.textContent="⤵";
 
-          const markSpan = document.createElement('span');
-          markSpan.className = 'cell-mark';
+          inner.appendChild(numSpan);
+          inner.appendChild(mark);
 
-          if (ladders[num]) {
-            markSpan.textContent = '⤴';
-            markSpan.classList.add('ladder');
-          } else if (snakes[num]) {
-            markSpan.textContent = '⤵';
-            markSpan.classList.add('snake');
-          } else {
-            markSpan.textContent = '';
-          }
+          const playersDiv=document.createElement("div");
+          playersDiv.className="players";
+          playersDiv.dataset.players=num;
 
-          inner.appendChild(numberSpan);
-          inner.appendChild(markSpan);
-
-          const playersDiv = document.createElement('div');
-          playersDiv.className = 'players';
-          playersDiv.dataset.players = num;
-
-          cell.appendChild(inner);
-          cell.appendChild(playersDiv);
-          boardElement.appendChild(cell);
+          c.appendChild(inner);
+          c.appendChild(playersDiv);
+          boardEl.appendChild(c);
         }
       }
     }
 
-    function renderPlayers() {
-      const playersDivs = document.querySelectorAll('.players');
-      playersDivs.forEach(div => div.innerHTML = '');
-
-      positions.forEach((pos, index) => {
-        const targetPlayersDiv = document.querySelector('.players[data-players="' + pos + '"]');
-        if (!targetPlayersDiv) return;
-        const token = document.createElement('div');
-        token.className = 'player-token ' + (index === 0 ? 'player1' : 'player2');
-        targetPlayersDiv.appendChild(token);
+    function renderPlayers(){
+      document.querySelectorAll(".players").forEach(p=>p.innerHTML="");
+      positions.forEach((pos,i)=>{
+        const target=document.querySelector('.players[data-players="'+pos+'"]');
+        if(!target) return;
+        const t=document.createElement("div");
+        t.className="player-token "+(i===0?"player1":"player2");
+        target.appendChild(t);
       });
     }
 
-    function log(message, isWinner = false) {
-      const line = document.createElement('div');
-      line.className = 'status-line';
-      if (isWinner) line.classList.add('winner');
-      line.textContent = message;
-      logBox.prepend(line);
+    function log(msg,win=false){
+      const l=document.createElement("div");
+      l.textContent=msg;
+      if(win) l.style.color="#fbbf24";
+      logBox.prepend(l);
     }
 
-    function getCurrentPlayerName() {
-      return playerNames[currentPlayer];
-    }
+    function takeTurn(isBot){
+      if(gameOver||isProcessing) return;
+      isProcessing=true;
 
-    function takeTurn(isBotTurn) {
-      if (gameOver) return;
-      if (isProcessingTurn) return;
-      isProcessingTurn = true;
+      diceSound();
+      const dice=Math.floor(Math.random()*6)+1;
+      diceDisplay.textContent=dice;
 
-      playDiceSound();
+      let newPos=positions[currentPlayer]+dice;
 
-      const dice = Math.floor(Math.random() * 6) + 1;
-      diceDisplay.textContent = dice;
-
-      const playerName = getCurrentPlayerName();
-      let newPos = positions[currentPlayer] + dice;
-
-      if (newPos > 100) {
-        log(playerName + ' melempar ' + dice + ' tapi lewat 100, tetap di ' + positions[currentPlayer] + '.');
-        switchTurnAfterMove(isBotTurn);
+      if(newPos>100){
+        log("Lewat 100, tetap di "+positions[currentPlayer]);
+        endTurn(isBot);
         return;
       }
 
-      log(playerName + ' melempar ' + dice + ' dan maju ke ' + newPos + '.');
+      log((currentPlayer===0?"Kamu":"Bot")+" maju ke "+newPos);
 
-      // cek ular / tangga
-      let playedLadderSound = false;
-      let playedSnakeSound = false;
-
-      if (ladders[newPos]) {
-        const to = ladders[newPos];
-        log('Tangga! ' + playerName + ' naik dari ' + newPos + ' ke ' + to + '.');
-        newPos = to;
-        playLadderSound();
-        playedLadderSound = true;
-      } else if (snakes[newPos]) {
-        const to = snakes[newPos];
-        log('Ular! ' + playerName + ' turun dari ' + newPos + ' ke ' + to + '.');
-        newPos = to;
-        playSnakeSound();
-        playedSnakeSound = true;
+      if(ladders[newPos]){
+        log("Naik tangga ke "+ladders[newPos]);
+        ladderSound();
+        newPos=ladders[newPos];
+      }
+      else if(snakes[newPos]){
+        log("Kena ular turun ke "+snakes[newPos]);
+        snakeSound();
+        newPos=snakes[newPos];
       }
 
-      positions[currentPlayer] = newPos;
+      positions[currentPlayer]=newPos;
       renderPlayers();
 
-      if (newPos === 100) {
-        gameOver = true;
-        log(playerName + ' MENANG! 🎉', true);
-        currentPlayerSpan.textContent = playerName + ' MENANG!';
-        playWinSound();
-        isProcessingTurn = false;
+      if(newPos===100){
+        log((currentPlayer===0?"Kamu":"Bot")+" MENANG!",true);
+        winSound();
+        currentPlayerSpan.textContent="Selesai";
+        gameOver=true;
+        isProcessing=false;
         return;
       }
 
-      switchTurnAfterMove(isBotTurn);
+      endTurn(isBot);
     }
 
-    function switchTurnAfterMove(isBotTurn) {
-      currentPlayer = currentPlayer === 0 ? 1 : 0;
-      currentPlayerSpan.textContent = getCurrentPlayerName();
-      isProcessingTurn = false;
+    function endTurn(isBot){
+      currentPlayer=currentPlayer===0?1:0;
+      currentPlayerSpan.textContent=currentPlayer===0?"Kamu":"Bot";
+      isProcessing=false;
 
-      if (isVsBot && !gameOver && currentPlayer === 1 && !isBotTurn) {
-        setTimeout(() => {
-          takeTurn(true);
-        }, 700);
+      if(currentPlayer===1 && !isBot){
+        setTimeout(()=>takeTurn(true),700);
       }
     }
 
-    function resetGame() {
-      positions = [1, 1];
-      currentPlayer = 0;
-      gameOver = false;
-      isProcessingTurn = false;
-      diceDisplay.textContent = '🎲';
-      logBox.innerHTML = '';
-      currentPlayerSpan.textContent = getCurrentPlayerName();
+    function resetGame(){
+      positions=[1,1];
+      currentPlayer=0;
+      gameOver=false;
+      isProcessing=false;
+      diceDisplay.textContent="🎲";
+      logBox.innerHTML="";
+      currentPlayerSpan.textContent="Kamu";
       renderPlayers();
-      log('Game di-reset. ' + getCurrentPlayerName() + ' mulai duluan. Tekan "Lempar Dadu".');
     }
 
-    function applyNamesFromInputs() {
-      const rawP1 = nameP1Input.value.trim();
-      const rawP2 = nameP2Input.value.trim();
-
-      playerNames[0] = rawP1 !== '' ? rawP1 : 'Kamu';
-      playerNames[1] = rawP2 !== '' ? rawP2 : 'Bot';
-
-      labelP1.textContent = playerNames[0] + ' (Biru)';
-      labelP2.textContent = playerNames[1] + ' (Kuning - Bot)';
-      currentPlayerSpan.textContent = getCurrentPlayerName();
-
-      log('Nama diset: ' + playerNames[0] + ' vs ' + playerNames[1] + '.');
-    }
-
-    rollButton.addEventListener('click', () => {
-      if (gameOver) return;
-      if (currentPlayer !== 0) {
-        log('Sekarang giliran Bot, tunggu dulu…');
+    rollButton.onclick=()=>{
+      if(gameOver) return;
+      if(currentPlayer!==0){
+        log("Tunggu giliran Bot...");
         return;
       }
-      // user interaction pertama: pastikan audio context boleh jalan
       ensureAudioContext();
       takeTurn(false);
-    });
+    };
 
-    resetButton.addEventListener('click', () => {
+    resetButton.onclick=()=>{
       ensureAudioContext();
       resetGame();
-    });
+    };
 
-    setNameButton.addEventListener('click', () => {
-      ensureAudioContext();
-      applyNamesFromInputs();
-    });
-
-    // Init awal
     createBoard();
     renderPlayers();
-    log('Selamat datang di Ular Tangga vs Bot dengan sound effect! ' + getCurrentPlayerName() + ' mulai duluan. Tekan "Lempar Dadu".');
+    log("Selamat datang di Polana Ular Tangga vs Bot!");
   </script>
 </body>
 </html>
