@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Game Ular Tangga</title>
+  <title>Game Ular Tangga vs Bot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -229,6 +229,47 @@
       font-weight: bold;
     }
 
+    .name-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #020617;
+    }
+
+    .name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .name-row label {
+      min-width: 76px;
+    }
+
+    .name-row input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 6px 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .name-row input:focus {
+      border-color: #2563eb;
+    }
+
+    .small-text {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
     @media (max-width: 768px) {
       .container {
         grid-template-columns: 1fr;
@@ -238,28 +279,45 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎲 Game Ular Tangga</h1>
-    <div class="subtitle">2 Pemain · Lempar dadu bergantian · Harus tepat di kotak 100 untuk menang</div>
+    <h1>🎲 Ular Tangga vs Bot 🤖</h1>
+    <div class="subtitle">Kamu vs Bot · Lempar dadu bergantian · Harus tepat di kotak 100 untuk menang · Sekarang pakai sound effect 🔊</div>
 
     <div id="board" class="board"></div>
 
     <div class="panel">
-      <h2>Status Permainan</h2>
+      <h2>Pengaturan & Status</h2>
+
+      <div class="name-inputs">
+        <div class="name-row">
+          <label for="nameP1">Kamu</label>
+          <input id="nameP1" type="text" placeholder="Nama kamu" />
+        </div>
+        <div class="name-row">
+          <label for="nameP2">Bot</label>
+          <input id="nameP2" type="text" placeholder="Nama Bot (opsional)" />
+        </div>
+        <button id="setNameButton" style="margin-top:4px; padding:6px 10px; font-size:12px;">
+          ✅ Set Nama
+        </button>
+        <div class="small-text">Kalau dikosongkan: default = "Kamu" & "Bot".</div>
+      </div>
 
       <div class="players-info">
         <div class="player-label">
-          <span class="dot-label dot-p1"></span> Player 1 (Biru)
+          <span class="dot-label dot-p1"></span>
+          <span id="labelP1">Kamu (Biru)</span>
         </div>
         <div class="player-label">
-          <span class="dot-label dot-p2"></span> Player 2 (Kuning)
+          <span class="dot-label dot-p2"></span>
+          <span id="labelP2">Bot (Kuning)</span>
         </div>
-        <div>Giliran: <span id="currentPlayer" class="current-player">Player 1</span></div>
+        <div>Giliran: <span id="currentPlayer" class="current-player">Kamu</span></div>
       </div>
 
       <div class="dice-display" id="diceDisplay">🎲</div>
 
       <button id="rollButton">
-        🎲 Lempar Dadu
+        🎲 Lempar Dadu (Giliran Kamu)
       </button>
 
       <button id="resetButton" style="background:#6b7280; margin-top:4px;">
@@ -271,6 +329,80 @@
   </div>
 
   <script>
+    // ====== SOUND ENGINE (Web Audio API) ======
+    let audioCtx = null;
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playBeep(frequency, duration, type = 'sine', volume = 0.2) {
+      ensureAudioContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = frequency;
+      gain.gain.value = volume;
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+      osc.start(now);
+      osc.stop(now + duration);
+    }
+
+    function playDiceSound() {
+      // beberapa beep cepat naik-turun
+      ensureAudioContext();
+      const now = audioCtx.currentTime;
+
+      for (let i = 0; i < 5; i++) {
+        const t = now + i * 0.05;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = 200 + Math.random() * 400;
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.06);
+      }
+    }
+
+    function playLadderSound() {
+      // arpeggio naik
+      const notes = [400, 550, 700];
+      notes.forEach((f, i) => {
+        setTimeout(() => playBeep(f, 0.12, 'sine', 0.22), i * 110);
+      });
+    }
+
+    function playSnakeSound() {
+      // dua nada turun
+      playBeep(300, 0.18, 'sawtooth', 0.22);
+      setTimeout(() => playBeep(180, 0.22, 'sawtooth', 0.22), 160);
+    }
+
+    function playWinSound() {
+      // melodi pendek
+      const notes = [
+        { f: 523, d: 0.18 },
+        { f: 587, d: 0.18 },
+        { f: 659, d: 0.18 },
+        { f: 784, d: 0.3 }
+      ];
+      notes.forEach((n, i) => {
+        setTimeout(() => playBeep(n.f, n.d, 'square', 0.25), i * 200);
+      });
+    }
+
+    // ====== GAME LOGIC ======
+
     // Peta ular & tangga (key = posisi awal, value = posisi akhir)
     const ladders = {
       2: 38,
@@ -305,22 +437,30 @@
     const logBox = document.getElementById('logBox');
     const currentPlayerSpan = document.getElementById('currentPlayer');
 
-    let positions = [1, 1]; // index 0 = player1, 1 = player2
-    let currentPlayer = 0;   // 0 atau 1
+    const nameP1Input = document.getElementById('nameP1');
+    const nameP2Input = document.getElementById('nameP2');
+    const setNameButton = document.getElementById('setNameButton');
+    const labelP1 = document.getElementById('labelP1');
+    const labelP2 = document.getElementById('labelP2');
+
+    // index 0 = Kamu (player), index 1 = Bot
+    let positions = [1, 1];
+    let currentPlayer = 0;        // 0 = kamu, 1 = bot
     let gameOver = false;
+    let isProcessingTurn = false;
+    const isVsBot = true;
+    let playerNames = ['Kamu', 'Bot'];
 
     function createBoard() {
       boardElement.innerHTML = '';
-      // Kita gambar dari baris atas (10) ke bawah (1)
+      // gambar dari baris atas (10) ke bawah (1)
       for (let row = 10; row >= 1; row--) {
-        const rowFromBottom = row; // 1 = baris bawah, 10 = baris atas
+        const rowFromBottom = row;
         for (let col = 1; col <= 10; col++) {
           let num;
           if (rowFromBottom % 2 === 0) {
-            // baris genap dari bawah: arah kanan ke kiri
             num = rowFromBottom * 10 - (col - 1);
           } else {
-            // baris ganjil dari bawah: arah kiri ke kanan
             num = (rowFromBottom - 1) * 10 + col;
           }
 
@@ -363,11 +503,9 @@
     }
 
     function renderPlayers() {
-      // Bersihkan token
       const playersDivs = document.querySelectorAll('.players');
       playersDivs.forEach(div => div.innerHTML = '');
 
-      // Render token tiap pemain
       positions.forEach((pos, index) => {
         const targetPlayersDiv = document.querySelector('.players[data-players="' + pos + '"]');
         if (!targetPlayersDiv) return;
@@ -385,71 +523,127 @@
       logBox.prepend(line);
     }
 
-    function rollDice() {
-      if (gameOver) return;
-      const dice = Math.floor(Math.random() * 6) + 1;
+    function getCurrentPlayerName() {
+      return playerNames[currentPlayer];
+    }
 
+    function takeTurn(isBotTurn) {
+      if (gameOver) return;
+      if (isProcessingTurn) return;
+      isProcessingTurn = true;
+
+      playDiceSound();
+
+      const dice = Math.floor(Math.random() * 6) + 1;
       diceDisplay.textContent = dice;
-      const playerName = currentPlayer === 0 ? 'Player 1' : 'Player 2';
+
+      const playerName = getCurrentPlayerName();
       let newPos = positions[currentPlayer] + dice;
 
-      // Aturan: harus tepat di 100
       if (newPos > 100) {
         log(playerName + ' melempar ' + dice + ' tapi lewat 100, tetap di ' + positions[currentPlayer] + '.');
-        switchTurn();
+        switchTurnAfterMove(isBotTurn);
         return;
       }
 
       log(playerName + ' melempar ' + dice + ' dan maju ke ' + newPos + '.');
 
-      // Cek ular / tangga
+      // cek ular / tangga
+      let playedLadderSound = false;
+      let playedSnakeSound = false;
+
       if (ladders[newPos]) {
         const to = ladders[newPos];
         log('Tangga! ' + playerName + ' naik dari ' + newPos + ' ke ' + to + '.');
         newPos = to;
+        playLadderSound();
+        playedLadderSound = true;
       } else if (snakes[newPos]) {
         const to = snakes[newPos];
         log('Ular! ' + playerName + ' turun dari ' + newPos + ' ke ' + to + '.');
         newPos = to;
+        playSnakeSound();
+        playedSnakeSound = true;
       }
 
       positions[currentPlayer] = newPos;
       renderPlayers();
 
-      // Cek menang
       if (newPos === 100) {
         gameOver = true;
         log(playerName + ' MENANG! 🎉', true);
         currentPlayerSpan.textContent = playerName + ' MENANG!';
+        playWinSound();
+        isProcessingTurn = false;
         return;
       }
 
-      switchTurn();
+      switchTurnAfterMove(isBotTurn);
     }
 
-    function switchTurn() {
+    function switchTurnAfterMove(isBotTurn) {
       currentPlayer = currentPlayer === 0 ? 1 : 0;
-      currentPlayerSpan.textContent = currentPlayer === 0 ? 'Player 1' : 'Player 2';
+      currentPlayerSpan.textContent = getCurrentPlayerName();
+      isProcessingTurn = false;
+
+      if (isVsBot && !gameOver && currentPlayer === 1 && !isBotTurn) {
+        setTimeout(() => {
+          takeTurn(true);
+        }, 700);
+      }
     }
 
     function resetGame() {
       positions = [1, 1];
       currentPlayer = 0;
       gameOver = false;
+      isProcessingTurn = false;
       diceDisplay.textContent = '🎲';
       logBox.innerHTML = '';
-      currentPlayerSpan.textContent = 'Player 1';
+      currentPlayerSpan.textContent = getCurrentPlayerName();
       renderPlayers();
-      log('Game di-reset. Player 1 mulai duluan.');
+      log('Game di-reset. ' + getCurrentPlayerName() + ' mulai duluan. Tekan "Lempar Dadu".');
     }
 
-    rollButton.addEventListener('click', rollDice);
-    resetButton.addEventListener('click', resetGame);
+    function applyNamesFromInputs() {
+      const rawP1 = nameP1Input.value.trim();
+      const rawP2 = nameP2Input.value.trim();
+
+      playerNames[0] = rawP1 !== '' ? rawP1 : 'Kamu';
+      playerNames[1] = rawP2 !== '' ? rawP2 : 'Bot';
+
+      labelP1.textContent = playerNames[0] + ' (Biru)';
+      labelP2.textContent = playerNames[1] + ' (Kuning - Bot)';
+      currentPlayerSpan.textContent = getCurrentPlayerName();
+
+      log('Nama diset: ' + playerNames[0] + ' vs ' + playerNames[1] + '.');
+    }
+
+    rollButton.addEventListener('click', () => {
+      if (gameOver) return;
+      if (currentPlayer !== 0) {
+        log('Sekarang giliran Bot, tunggu dulu…');
+        return;
+      }
+      // user interaction pertama: pastikan audio context boleh jalan
+      ensureAudioContext();
+      takeTurn(false);
+    });
+
+    resetButton.addEventListener('click', () => {
+      ensureAudioContext();
+      resetGame();
+    });
+
+    setNameButton.addEventListener('click', () => {
+      ensureAudioContext();
+      applyNamesFromInputs();
+    });
 
     // Init awal
     createBoard();
     renderPlayers();
-    log('Selamat datang di Ular Tangga! Player 1 mulai duluan.');
+    log('Selamat datang di Ular Tangga vs Bot dengan sound effect! ' + getCurrentPlayerName() + ' mulai duluan. Tekan "Lempar Dadu".');
   </script>
 </body>
 </html>
